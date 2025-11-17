@@ -1,0 +1,14 @@
+loaders:
+  - type: python
+    search_path: [.]
+    modules: ['variant_annotation', 'src.models', 'src.annotation', 'src.vep', 'src.compute_hgvs']
+
+processors:
+  - type: filter
+  - type: smart
+  - type: crossref
+
+renderer:
+  type: markdown
+  descriptive_class_title: false
+  render_module_header: true
