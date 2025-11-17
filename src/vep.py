@@ -6,9 +6,16 @@ Created: 2025-11-17
 Description:
     Helper functions to interact with Ensembl VEP REST API and parse data retrieved from the API
 """
-from tenacity import retry, stop_after_attempt, wait_random_exponential, retry_if_exception_type
+
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_random_exponential,
+    retry_if_exception_type,
+)
 import requests
 from src.config import VEP_GRCH37_URL, VEP_HEADERS
+
 
 def get_genes_for_most_severe_consequence(vep_record: dict) -> str | None:
     """
@@ -16,8 +23,8 @@ def get_genes_for_most_severe_consequence(vep_record: dict) -> str | None:
 
     Args:
         vep_record (dict): Single VEP JSON record for a variant
-    
-    Returns: 
+
+    Returns:
         String of gene symbol where "consequence_terms" matches "most_severe_consequence"
         Or None if "transcript_consequences" key is not present in @vep_record
     """
@@ -27,11 +34,15 @@ def get_genes_for_most_severe_consequence(vep_record: dict) -> str | None:
         if most_severe in cons_terms:
             return transcript["gene_symbol"]
 
+
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_random_exponential(multiplier=1, max=60),
-    retry=retry_if_exception_type(requests.exceptions.RequestException) | retry_if_exception_type(requests.exceptions.HTTPError) | retry_if_exception_type(requests.exceptions.ConnectionError) | retry_if_exception_type(requests.exceptions.JSONDecodeError),
-    reraise=False
+    retry=retry_if_exception_type(requests.exceptions.RequestException)
+    | retry_if_exception_type(requests.exceptions.HTTPError)
+    | retry_if_exception_type(requests.exceptions.ConnectionError)
+    | retry_if_exception_type(requests.exceptions.JSONDecodeError),
+    reraise=False,
 )
 def make_vep_request(payload: dict) -> dict:
     """
@@ -41,10 +52,12 @@ def make_vep_request(payload: dict) -> dict:
 
     Args:
         payload (dict): Payload to send to the VEP REST API. Contains batch of HGVS notations to be annotated
-    
+
     Returns:
         JSON response from the VEP REST API
     """
-    response = requests.post(VEP_GRCH37_URL, json=payload, headers=VEP_HEADERS, timeout=10)
+    response = requests.post(
+        VEP_GRCH37_URL, json=payload, headers=VEP_HEADERS, timeout=10
+    )
     response.raise_for_status()
     return response.json()

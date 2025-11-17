@@ -6,6 +6,8 @@ Created: 2025-11-17
 Description:
     Module with function to compute HGVS genomic notation from variant info
 """
+
+
 def make_hgvs(chrom: str, pos: int, ref: str, alt: str) -> tuple[str, str]:
     """
     Convert a VCF variant (CHROM, POS, REF, ALT) into HGVS genomic notation.
@@ -14,13 +16,13 @@ def make_hgvs(chrom: str, pos: int, ref: str, alt: str) -> tuple[str, str]:
       - Insertions
       - Deletions
       - Deletion-insertion (delins)
-    
+
     Args:
         chrom (str): Chromosome (e.g., "1", "X", "MT
         pos (int): 1-based position of the variant
         ref (str): Reference allele sequence
         alt (str): Alternate allele sequence
-    
+
     Returns:
         Tuple of (hgvs_notation (str), variant_type (str)) where variant_type is one of:
             - "sub" for SNPs
@@ -41,9 +43,9 @@ def make_hgvs(chrom: str, pos: int, ref: str, alt: str) -> tuple[str, str]:
     # trim shared suffix
     suffix = 0
     while (
-        suffix < len(ref_trimmed) and
-        suffix < len(alt_trimmed) and
-        ref_trimmed[-(suffix + 1)] == alt_trimmed[-(suffix + 1)]
+        suffix < len(ref_trimmed)
+        and suffix < len(alt_trimmed)
+        and ref_trimmed[-(suffix + 1)] == alt_trimmed[-(suffix + 1)]
     ):
         suffix += 1
 

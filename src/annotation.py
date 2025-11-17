@@ -6,6 +6,7 @@ Created: 2025-11-17
 Description:
     Module with functions to iterate over a vcf and annotate them
 """
+
 from typing import Generator
 from src.models import AnnotatedVariant, Variant
 from src.compute_hgvs import make_hgvs
@@ -13,13 +14,14 @@ from pathlib import Path
 from src.vep import make_vep_request, get_genes_for_most_severe_consequence
 from cyvcf2 import VCF
 
+
 def read_vcf(input_vcf: Path) -> Generator[Variant, None, None]:
     """
     Iterate through VCF and yield instance(s) of Variant for each variant
 
     Args:
         input_vcf (Path): Path to the input VCF file
-    
+
     Returns:
         Yield one instance of Variant
     """
@@ -38,7 +40,7 @@ def read_vcf(input_vcf: Path) -> Generator[Variant, None, None]:
                 depth=variant.INFO["DP"],
                 ref_reads=variant.INFO["RO"],
                 alt_reads=ao[idx],
-                maf=round(min(af[idx], 1 - af[idx]), 2)
+                maf=round(min(af[idx], 1 - af[idx]), 2),
             )
 
 
@@ -48,7 +50,7 @@ def build_annotation(variant_data_batch: list[Variant]) -> list[AnnotatedVariant
 
     Args:
         variant_data_batch (list[Variant]): All instances of Variant that are to be annotated
-    
+
     Returns:
         List of instances of AnnotatedVariant that represents all info related to annotated variants
     """
@@ -61,14 +63,14 @@ def build_annotation(variant_data_batch: list[Variant]) -> list[AnnotatedVariant
 
     # All the variant types for all variants in @variant_data_batch
     variant_type_batch = []
-    
+
     for variant_data in variant_data_batch:
         # Get the hgvs notation for that variant and the variant type
         hgvs, variant_type = make_hgvs(
             chrom=variant_data.chrom,
             pos=variant_data.pos,
             ref=variant_data.ref,
-            alt=variant_data.alt
+            alt=variant_data.alt,
         )
         variant_type_batch.append(variant_type)
         hgvs_batch.append(hgvs)
@@ -77,34 +79,37 @@ def build_annotation(variant_data_batch: list[Variant]) -> list[AnnotatedVariant
     # Payload format retrieved from https://grch37.rest.ensembl.org/documentation/info/vep_hgvs_post
     payload = {"hgvs_notations": hgvs_batch}
     vep_data_batch = make_vep_request(payload)
-    
+
     # Iterate through all VEP data for this batch and create AnnotatedVariant instances
     for idx, vep_data in enumerate(vep_data_batch):
         annotated_variants.append(
             AnnotatedVariant(
                 # Data from Variant
                 **variant_data_batch[idx].model_dump(),
-                gene = get_genes_for_most_severe_consequence(vep_data),
+                gene=get_genes_for_most_severe_consequence(vep_data),
                 variant_type=variant_type_batch[idx],
                 consequence=vep_data["most_severe_consequence"],
                 alt_perc=round(
-                    (variant_data_batch[idx].alt_reads * 100) / 
-                    (variant_data_batch[idx].alt_reads + variant_data_batch[idx].ref_reads)
-                    , 2
-                )
+                    (variant_data_batch[idx].alt_reads * 100)
+                    / (
+                        variant_data_batch[idx].alt_reads
+                        + variant_data_batch[idx].ref_reads
+                    ),
+                    2,
+                ),
             )
         )
-    
+
     return annotated_variants
-        
+
 
 def ensure_tuple(value: tuple | int) -> tuple:
     """
     Convert single values to tuple for consistent iteration downstream
-    
+
     Args:
         value (tuple|int): Convert to tuple if int to ensure downstream processing has consistent syntax
-    
+
     Returns:
         Tuple
     """
