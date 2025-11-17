@@ -121,3 +121,5 @@ Here is some very preliminary benchmarking done by varying the number of threads
  - More validation on both data in vcf and data obtained from VEP API
  - Setup github action that automatically generates [PyDocs.md](./PyDocs.md) whenever there is a change in source code
  - Add `summary` mode to script that parses the vcf file and prints some summary statistics
+ - Enforce line length for py scripts
+ - More info from both VEP API and VCF could be added to annotated csv based on requirements
