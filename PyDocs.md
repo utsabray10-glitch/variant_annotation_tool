@@ -87,6 +87,54 @@ A variant record from a VCF file
 - `maf` _float_ - Minor allele frequency (0 to 1)
 - `type` _str_ - Type of variant ("snp", "ins", "del", "complex", "mnp")
 
+<a id="src.models.Variant.pos"></a>
+
+#### pos
+
+variant.POS
+
+<a id="src.models.Variant.ref"></a>
+
+#### ref
+
+variant.REF
+
+<a id="src.models.Variant.alt"></a>
+
+#### alt
+
+variant.ALT
+
+<a id="src.models.Variant.depth"></a>
+
+#### depth
+
+variant.INFO["DP"]
+
+<a id="src.models.Variant.ref_reads"></a>
+
+#### ref\_reads
+
+variant.INFO["RO"]
+
+<a id="src.models.Variant.alt_reads"></a>
+
+#### alt\_reads
+
+variant.INFO["AO"]
+
+<a id="src.models.Variant.maf"></a>
+
+#### maf
+
+min(variant.INFO["AF"], 1 - variant.INFO["AF"])
+
+<a id="src.models.Variant.type"></a>
+
+#### type
+
+variant.INFO["TYPE"]
+
 <a id="src.models.Variant.validate_alt_ref_equality"></a>
 
 #### validate\_alt\_ref\_equality
@@ -126,6 +174,24 @@ Contains all fields from Variant
 - `alt_perc` _float_ - Percentage of reads supporting the alternate allele (0.0 to 100.0)
 - `gene` _str_ - Gene affected by the variant
 - `consequence` _str_ - Consequence of the variant
+
+<a id="src.models.AnnotatedVariant.alt_perc"></a>
+
+#### alt\_perc
+
+(alt_reads / (alt_reads + ref_reads)) * 100
+
+<a id="src.models.AnnotatedVariant.gene"></a>
+
+#### gene
+
+Obtained from VEP API
+
+<a id="src.models.AnnotatedVariant.consequence"></a>
+
+#### consequence
+
+Obtained from VEP API
 
 <a id="src.annotation"></a>
 
@@ -250,52 +316,22 @@ https://github.com/jd/tenacity?tab=readme-ov-file#waiting-before-retrying
 
 **Arguments**:
 
-- `payload` _dict_ - Payload to send to the VEP REST API. Contains batch of HGVS notations to be annotated
+- `payload` _dict_ - Payload to send to the VEP REST API. Contains batch of variants to be annotated
   
 
 **Returns**:
 
   JSON response from the VEP REST API
 
-<a id="src.compute_hgvs"></a>
+<a id="src.config"></a>
 
-# src.compute\_hgvs
+# src.config
 
 Author: Utsab Ray
 
 Created: 2025-11-17
 
 Description:
-    Module with function to compute HGVS genomic notation from variant info
-
-<a id="src.compute_hgvs.make_hgvs"></a>
-
-#### make\_hgvs
-
-```python
-def make_hgvs(chrom: str, pos: int, ref: str, alt: str) -> tuple[str, str]
-```
-
-Convert a VCF variant (CHROM, POS, REF, ALT) into HGVS genomic notation.
-Handles:
-- SNPs
-- Insertions
-- Deletions
-- Deletion-insertion (delins)
-
-**Arguments**:
-
-- `chrom` _str_ - Chromosome (e.g., "1", "X", "MT
-- `pos` _int_ - 1-based position of the variant
-- `ref` _str_ - Reference allele sequence
-- `alt` _str_ - Alternate allele sequence
-  
-
-**Returns**:
-
-  Tuple of (hgvs_notation (str), variant_type (str)) where variant_type is one of:
-  - "sub" for SNPs
-  - "ins" for insertions
-  - "del" for deletions
-  - "delins" for deletion-insertions
+    Config file with constants for VEP API
+    For production code, provide way to override these via command line or environment variables
 

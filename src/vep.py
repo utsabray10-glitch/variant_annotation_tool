@@ -32,7 +32,7 @@ def get_genes_for_most_severe_consequence(vep_record: dict) -> str | None:
     for transcript in vep_record.get("transcript_consequences", []):
         cons_terms = transcript["consequence_terms"]
         if most_severe in cons_terms:
-            return transcript["gene_symbol"]
+            return transcript["gene_id"]
 
 
 @retry(
@@ -51,7 +51,7 @@ def make_vep_request(payload: dict) -> dict:
     https://github.com/jd/tenacity?tab=readme-ov-file#waiting-before-retrying
 
     Args:
-        payload (dict): Payload to send to the VEP REST API. Contains batch of HGVS notations to be annotated
+        payload (dict): Payload to send to the VEP REST API. Contains batch of variants to be annotated
 
     Returns:
         JSON response from the VEP REST API
@@ -59,5 +59,6 @@ def make_vep_request(payload: dict) -> dict:
     response = requests.post(
         VEP_GRCH37_URL, json=payload, headers=VEP_HEADERS, timeout=10
     )
+    # If an exception is thrown here, tenacity will catch it and retry based on the strategy defined above
     response.raise_for_status()
     return response.json()

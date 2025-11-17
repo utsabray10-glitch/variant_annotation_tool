@@ -11,6 +11,7 @@ from typing import Generator
 from src.models import AnnotatedVariant, Variant
 from pathlib import Path
 from src.vep import make_vep_request, get_genes_for_most_severe_consequence
+from src.config import VEP_REGION_PAYLOAD
 from cyvcf2 import VCF
 
 
@@ -29,6 +30,7 @@ def read_vcf(input_vcf: Path) -> Generator[Variant, None, None]:
     for variant in vcf:
         ao = ensure_tuple(variant.INFO["AO"])
         af = ensure_tuple(variant.INFO["AF"])
+        # Even if multiple ALT alleles, variant.INFO["TYPE"] gives comma separated string of types instead of tuple
         variant_type = variant.INFO["TYPE"].split(",") if "," in variant.INFO["TYPE"] else [variant.INFO["TYPE"]]
         for idx, alt in enumerate(variant.ALT):
             # For multiple ALT alleles, create an annotation for each individual ALT allele
@@ -63,7 +65,12 @@ def build_annotation(variant_data_batch: list[Variant]) -> list[AnnotatedVariant
     variant_payload_batch = []
 
     for variant_data in variant_data_batch:
-        variant_payload = f"{variant_data.chrom} {variant_data.pos} . {variant_data.ref} {variant_data.alt} . . ."
+        variant_payload = VEP_REGION_PAYLOAD.format(
+            chrom=variant_data.chrom,
+            pos=variant_data.pos,
+            ref=variant_data.ref,
+            alt=variant_data.alt,
+        )
         variant_payload_batch.append(variant_payload)
 
     # Payload to send to the API

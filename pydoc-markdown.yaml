@@ -1,7 +1,7 @@
 loaders:
   - type: python
     search_path: [.]
-    modules: ['variant_annotation', 'src.models', 'src.annotation', 'src.vep', 'src.compute_hgvs']
+    modules: ['variant_annotation', 'src.models', 'src.annotation', 'src.vep', 'src.config']
 
 processors:
   - type: filter

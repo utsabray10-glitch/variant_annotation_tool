@@ -4,7 +4,7 @@ This project creates a variant annotation tool that accepts an input vcf and out
 
 ## Setup
 
-Use [Poetry](https://python-poetry.org/) or pip:
+Use [Poetry](https://python-poetry.org/docs/#installation) or pip:
 ```bash
 poetry install
 eval "$(poetry env activate)"
@@ -32,7 +32,7 @@ Driver script that orchestrates the entire process from parsing input to writing
 
 #### [annotation](src/annotation.py)
 
-Module with functions to iterate over a VCF and annotate them. Creates an instance of the Variant model for each ALT allele of a variant. Once the Variant model is populated, the VEP API is queried using a computed HGVS string. Batch requests are made to the VEP API for efficiency. The information obtained from the VEP API, plus the original information in the Variant model are put together to create the AnnotatedVariant model.
+Module with functions to iterate over a VCF and annotate them. Creates an instance of the Variant model for each ALT allele of a variant. Once the Variant model is populated, the VEP API is queried using a computed string made from the chromosome, reference allele, alternate allele and start position. Batch requests are made to the VEP API for efficiency. The information obtained from the VEP API, plus the original information in the Variant model are put together to create the AnnotatedVariant model.
 
 #### [config](src/config.py)
 
@@ -60,7 +60,7 @@ Module with helper functions to interact with Ensembl VEP REST API and parse dat
 | maf | Minor allele frequency (0.0 to 1.0) |
 | type | Type of variant (snp, ins, del, complex, mnp) |
 | alt_perc | Percentage of reads supporting alternate allele |
-| gene | Gene symbol affected by the variant |
+| gene | Gene id affected by the variant |
 | consequence | Most severe consequence from VEP annotation |
 
 ### Methodology
@@ -75,7 +75,7 @@ Module with helper functions to interact with Ensembl VEP REST API and parse dat
  - **maf**: Minimum(variant.INFO["AF"], 1 - variant.INFO["AF"]). variant.INFO["AF"] could also be a list in which case we pick one value
  - **type**: one value in variant.INFO["TYPE"] if it's comma separated, else just variant.INFO["TYPE"]
  - **alt_perc**: alt_reads / (alt_reads + ref_reads) * 100
- - **gene**: get gene of transcript where "consequence_terms" matches "most_severe_consequence"
+ - **gene**: get gene_id of transcript where "consequence_terms" matches "most_severe_consequence"
  - **consequence**: most severe consequence
 
 ## Documentation
@@ -90,8 +90,8 @@ YAML file for configuring pydoc-markdown is [here](./pydoc-markdown.yaml)
 
  - Breaking each ALT allele into it's own variant in the output csv
  - Getting gene of transcript where the most severe consequence is one of the consequence terms. Alternative would be to report all genes
+ - Also using gene_id instead of gene_symbol for the annotation
  - Not reporting all consequences of all transcripts
- - Computing HGVS notation based on REF and ALT and not on CIGAR string
  - Inferring type from TYPE attribute of INFO field of VCF
 
 ## Parallelism and Batching
@@ -109,8 +109,8 @@ Here is some very preliminary benchmarking done by varying the number of threads
 
 ## Limitations and Improvements
 
- - No testing at all. Should test all computations and querying of the API
- - All threads wait while computation of all of them is finished. This waiting is unnecessary. Threads should be released the moment their result is consumed.
+ - No testing at all. Should test all computations and querying of the API. Ideally set up unit tests using pytest
+ - All threads wait for the computation of all threads to finish, and then they are given work again. This waiting is unnecessary. Threads should be released the moment their result is consumed.
  - Optimal number of threads and optimal batch size can be obtained using more benchmarking
  - More comprehensive variant typing by looking at REF and ALT allele sequences
  - More validation on both data in vcf and data obtained from VEP API
