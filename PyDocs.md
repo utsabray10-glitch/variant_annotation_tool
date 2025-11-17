@@ -19,8 +19,10 @@ python variant_annotation.py
 - `--threads` - Number of threads for parallel processing (default: 8, max: 32)
 - `--batch_size` - Number of variants to process in each batch, relevant for querying Ensembl VEP API (default: 100)
   
-  Output:
-  CSV file with annotated variants
+
+**Notes**:
+
+  Writes CSV file with annotated variants
 
 <a id="variant_annotation.main"></a>
 
@@ -47,7 +49,9 @@ Wait for futures to complete and write results to @writer in submission order. T
 - `futures` _list[Future]_ - Single unit of work which is responsible for a batch of variants
 - `writer` _csv.DictWriter_ - Enable writing of AnnotatedVariant model instances to a csv
   
-  Output:
+
+**Notes**:
+
   Write all annotated variants processed by all threads in @futues
 
 <a id="src.models"></a>
