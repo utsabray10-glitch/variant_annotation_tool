@@ -31,7 +31,11 @@ def read_vcf(input_vcf: Path) -> Generator[Variant, None, None]:
         ao = ensure_tuple(variant.INFO["AO"])
         af = ensure_tuple(variant.INFO["AF"])
         # Even if multiple ALT alleles, variant.INFO["TYPE"] gives comma separated string of types instead of tuple
-        variant_type = variant.INFO["TYPE"].split(",") if "," in variant.INFO["TYPE"] else [variant.INFO["TYPE"]]
+        variant_type = (
+            variant.INFO["TYPE"].split(",")
+            if "," in variant.INFO["TYPE"]
+            else [variant.INFO["TYPE"]]
+        )
         for idx, alt in enumerate(variant.ALT):
             # For multiple ALT alleles, create an annotation for each individual ALT allele
             yield Variant(

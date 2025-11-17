@@ -28,14 +28,16 @@ class Variant(BaseModel):
     """
 
     chrom: str
-    pos: int = Field(gt=0) # variant.POS
-    ref: str = Field(pattern=r"^[ACGT]+$") # variant.REF
-    alt: str = Field(pattern=r"^[ACGT]+$") # variant.ALT
-    depth: int = Field(ge=0) # variant.INFO["DP"]
-    ref_reads: int = Field(ge=0) # variant.INFO["RO"]
-    alt_reads: int = Field(ge=0) # variant.INFO["AO"]
-    maf: float = Field(ge=0.0, le=1.0) # min(variant.INFO["AF"], 1 - variant.INFO["AF"])
-    type: Literal["snp", "ins", "del", "complex", "mnp"] # variant.INFO["TYPE"]
+    pos: int = Field(gt=0)  # variant.POS
+    ref: str = Field(pattern=r"^[ACGT]+$")  # variant.REF
+    alt: str = Field(pattern=r"^[ACGT]+$")  # variant.ALT
+    depth: int = Field(ge=0)  # variant.INFO["DP"]
+    ref_reads: int = Field(ge=0)  # variant.INFO["RO"]
+    alt_reads: int = Field(ge=0)  # variant.INFO["AO"]
+    maf: float = Field(
+        ge=0.0, le=1.0
+    )  # min(variant.INFO["AF"], 1 - variant.INFO["AF"])
+    type: Literal["snp", "ins", "del", "complex", "mnp"]  # variant.INFO["TYPE"]
 
     @model_validator(mode="after")
     def validate_alt_ref_equality(self):
@@ -69,6 +71,8 @@ class AnnotatedVariant(Variant):
         consequence (str): Consequence of the variant
     """
 
-    alt_perc: float = Field(ge=0.0, le=100.0) # (alt_reads / (alt_reads + ref_reads)) * 100
-    gene: str | None = None # Obtained from VEP API
-    consequence: str | None = None # Obtained from VEP API
+    alt_perc: float = Field(
+        ge=0.0, le=100.0
+    )  # (alt_reads / (alt_reads + ref_reads)) * 100
+    gene: str | None = None  # Obtained from VEP API
+    consequence: str | None = None  # Obtained from VEP API
