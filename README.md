@@ -22,7 +22,7 @@ poetry export -f requirements.txt --output requirements.txt --with dev --without
 ```bash
 python variant_annotation.py --vcf <input vcf> --output <output csv> --threads <num threads for parallel processing> --batch_size <num variants to process together in one thread and one VEP API request>
 ```
-Default for `--vcf` is the `challenge_data.vcf`. The other arguments also have defaults that can be seen in [PyDocs](PyDocs.md)
+Default for `--vcf` is the `challenge_data.vcf`, also found in the [repo](./challenge_data.vcf). The other arguments also have defaults that can be seen in [PyDocs](PyDocs.md)
 
 ## Source Code Overview
 
@@ -48,7 +48,9 @@ Module with definitions of Pydantic models for Variant and AnnotatedVariant. Als
 
 #### [vep](src/vep.py)
 
-## Output Overview
+Module with helper functions to interact with Ensembl VEP REST API and parse data retrieved from the API
+
+## Output Overview (ADD OUTPUT CSV)
 
 | Column | Description |
 |--------|-------------|
@@ -116,3 +118,4 @@ Here is some very preliminary benchmarking done by varying the number of threads
  - Optimal number of threads and optimal batch size can be obtained using more benchmarking
  - Support for generating HGVS notation for more variant types
  - More validation on both data in vcf and data obtained from VEP API
+ - Setup github action that automatically generates [PyDocs.md](./PyDocs.md) whenever there is a change in source code
