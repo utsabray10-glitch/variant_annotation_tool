@@ -80,6 +80,7 @@ def build_annotation(variant_data_batch: list[Variant]) -> list[AnnotatedVariant
     # Payload to send to the API
     # Payload format retrieved from https://grch37.rest.ensembl.org/documentation/info/vep_region_post
     payload = {"variants": variant_payload_batch}
+    # TODO: Handle case where vep_data_batch is None
     vep_data_batch = make_vep_request(payload)
 
     # Iterate through all VEP data for this batch and create AnnotatedVariant instances

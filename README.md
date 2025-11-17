@@ -114,6 +114,7 @@ Here is some very preliminary benchmarking done by varying the number of threads
 
 ## Limitations and Improvements
 
+ - Set more default values for fields that are read in from VCF. The example VCF is clean and has all values for all fields, but in some cases there might be fields with values missing and that would cause this tool to error out
  - No testing at all. Should test all computations and querying of the API. Ideally set up unit tests using pytest
  - All threads wait for the computation of all threads to finish, and then they are given work again. This waiting is unnecessary. Threads should be released the moment their result is consumed.
  - Optimal number of threads and optimal batch size can be obtained using more benchmarking
