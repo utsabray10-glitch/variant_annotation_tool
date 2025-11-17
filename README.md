@@ -12,6 +12,7 @@ eval "$(poetry env activate)"
 pip install -r requirements.txt
 ```
 The `eval` will activate the virtual environment that Poetry created
+
 requirements.txt file was generated using:
 ```bash
 poetry export -f requirements.txt --output requirements.txt --with dev --without-hashes
@@ -22,9 +23,11 @@ poetry export -f requirements.txt --output requirements.txt --with dev --without
 ```bash
 python variant_annotation.py --vcf <input vcf> --output <output csv> --threads <num threads for parallel processing> --batch_size <num variants to process together in one thread and one VEP API request>
 ```
-Default for `--vcf` is the `challenge_data.vcf`, also found in the [repo](./challenge_data.vcf). The other arguments also have defaults that can be seen in [PyDocs](PyDocs.md)
+Default for `--vcf` is the `challenge_data.vcf`, also found in the [repo](./challenge_data.vcf). The other arguments also have defaults that can be seen in [PyDocs](./PyDocs.md)
 
 ## Source Code Overview
+
+Refer to [PyDocs](./PyDocs.md) for function signatures and more information on attributes and classes.
 
 #### [variant_annotation](variant_annotation.py)
 
@@ -46,7 +49,9 @@ Module with definitions of Pydantic models for Variant and AnnotatedVariant. Als
 
 Module with helper functions to interact with Ensembl VEP REST API and parse data retrieved from the API
 
-## Output Overview (ADD OUTPUT CSV)
+## Output Overview 
+
+Output file can be found at [annotated_variants.csv](./annotated_variants.csv)
 
 | Column | Description |
 |--------|-------------|
@@ -115,3 +120,4 @@ Here is some very preliminary benchmarking done by varying the number of threads
  - More comprehensive variant typing by looking at REF and ALT allele sequences
  - More validation on both data in vcf and data obtained from VEP API
  - Setup github action that automatically generates [PyDocs.md](./PyDocs.md) whenever there is a change in source code
+ - Add `summary` mode to script that parses the vcf file and prints some summary statistics
