@@ -8,6 +8,7 @@ Description:
 """
 
 from pydantic import BaseModel, Field, model_validator
+from typing import Literal
 
 
 class Variant(BaseModel):
@@ -23,6 +24,7 @@ class Variant(BaseModel):
         ref_reads (int): Number of reads supporting the reference allele
         alt_reads (int): Number of reads supporting the alternate allele
         maf (float): Minor allele frequency (0 to 1)
+        type (str): Type of variant ("snp", "ins", "del", "complex", "mnp")
     """
 
     chrom: str
@@ -33,6 +35,7 @@ class Variant(BaseModel):
     ref_reads: int = Field(ge=0)
     alt_reads: int = Field(ge=0)
     maf: float = Field(ge=0.0, le=1.0)
+    type: Literal["snp", "ins", "del", "complex", "mnp"]
 
     @model_validator(mode="after")
     def validate_alt_ref_equality(self):
@@ -62,12 +65,10 @@ class AnnotatedVariant(Variant):
     Attributes:
         all fields from Variant
         alt_perc (float): Percentage of reads supporting the alternate allele (0.0 to 100.0)
-        variant_type (str): Type of variant
         gene (str): Gene affected by the variant
         consequence (str): Consequence of the variant
     """
 
     alt_perc: float = Field(ge=0.0, le=100.0)
-    variant_type: str
     gene: str | None = None
     consequence: str | None = None

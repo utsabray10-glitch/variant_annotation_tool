@@ -34,10 +34,6 @@ Driver script that orchestrates the entire process from parsing input to writing
 
 Module with functions to iterate over a VCF and annotate them. Creates an instance of the Variant model for each ALT allele of a variant. Once the Variant model is populated, the VEP API is queried using a computed HGVS string. Batch requests are made to the VEP API for efficiency. The information obtained from the VEP API, plus the original information in the Variant model are put together to create the AnnotatedVariant model.
 
-#### [compute_hgvs](src/compute_hgvs.py)
-
-Module with function to compute HGVS genomic notation
-
 #### [config](src/config.py)
 
 Helper file with constants
@@ -62,8 +58,8 @@ Module with helper functions to interact with Ensembl VEP REST API and parse dat
 | ref_reads | Number of reads supporting reference allele |
 | alt_reads | Number of reads supporting alternate allele |
 | maf | Minor allele frequency (0.0 to 1.0) |
-| alt_perc | Percentage of reads supporting alternate allele (0.0 to 100.0) |
-| variant_type | Type of variant (SNP, insertion, deletion, delins) |
+| type | Type of variant (snp, ins, del, complex, mnp) |
+| alt_perc | Percentage of reads supporting alternate allele |
 | gene | Gene symbol affected by the variant |
 | consequence | Most severe consequence from VEP annotation |
 
@@ -77,8 +73,8 @@ Module with helper functions to interact with Ensembl VEP REST API and parse dat
  - **ref_reads**: variant.INFO["RO"]
  - **alt_reads**: one value in variant.INFO["AO"] if it's a list, else just variant.INFO["AO"]
  - **maf**: Minimum(variant.INFO["AF"], 1 - variant.INFO["AF"]). variant.INFO["AF"] could also be a list in which case we pick one value
+ - **type**: one value in variant.INFO["TYPE"] if it's comma separated, else just variant.INFO["TYPE"]
  - **alt_perc**: alt_reads / (alt_reads + ref_reads) * 100
- - **variant_type**: infered from ref and alt, either "sub", "ins", "del" or "delins"
  - **gene**: get gene of transcript where "consequence_terms" matches "most_severe_consequence"
  - **consequence**: most severe consequence
 
@@ -96,7 +92,7 @@ YAML file for configuring pydoc-markdown is [here](./pydoc-markdown.yaml)
  - Getting gene of transcript where the most severe consequence is one of the consequence terms. Alternative would be to report all genes
  - Not reporting all consequences of all transcripts
  - Computing HGVS notation based on REF and ALT and not on CIGAR string
- - Not reporting multi nucleotide polymorphism(mnp) and complex variants separately, but bundling them up into `delins`
+ - Inferring type from TYPE attribute of INFO field of VCF
 
 ## Parallelism and Batching
 
@@ -116,6 +112,6 @@ Here is some very preliminary benchmarking done by varying the number of threads
  - No testing at all. Should test all computations and querying of the API
  - All threads wait while computation of all of them is finished. This waiting is unnecessary. Threads should be released the moment their result is consumed.
  - Optimal number of threads and optimal batch size can be obtained using more benchmarking
- - Support for generating HGVS notation for more variant types
+ - More comprehensive variant typing by looking at REF and ALT allele sequences
  - More validation on both data in vcf and data obtained from VEP API
  - Setup github action that automatically generates [PyDocs.md](./PyDocs.md) whenever there is a change in source code

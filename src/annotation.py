@@ -9,7 +9,6 @@ Description:
 
 from typing import Generator
 from src.models import AnnotatedVariant, Variant
-from src.compute_hgvs import make_hgvs
 from pathlib import Path
 from src.vep import make_vep_request, get_genes_for_most_severe_consequence
 from cyvcf2 import VCF
@@ -30,6 +29,7 @@ def read_vcf(input_vcf: Path) -> Generator[Variant, None, None]:
     for variant in vcf:
         ao = ensure_tuple(variant.INFO["AO"])
         af = ensure_tuple(variant.INFO["AF"])
+        variant_type = variant.INFO["TYPE"].split(",") if "," in variant.INFO["TYPE"] else [variant.INFO["TYPE"]]
         for idx, alt in enumerate(variant.ALT):
             # For multiple ALT alleles, create an annotation for each individual ALT allele
             yield Variant(
@@ -41,6 +41,7 @@ def read_vcf(input_vcf: Path) -> Generator[Variant, None, None]:
                 ref_reads=variant.INFO["RO"],
                 alt_reads=ao[idx],
                 maf=round(min(af[idx], 1 - af[idx]), 2),
+                type=variant_type[idx],
             )
 
 
@@ -58,26 +59,16 @@ def build_annotation(variant_data_batch: list[Variant]) -> list[AnnotatedVariant
     # Elements correspond one to one with @variant_data_batch
     annotated_variants = []
 
-    # All the HGVS notations for all variants in @variant_data_batch
-    hgvs_batch = []
-
-    # All the variant types for all variants in @variant_data_batch
-    variant_type_batch = []
+    # Payloads (string for that variant to query API) for all variants in @variant_data_batch
+    variant_payload_batch = []
 
     for variant_data in variant_data_batch:
-        # Get the hgvs notation for that variant and the variant type
-        hgvs, variant_type = make_hgvs(
-            chrom=variant_data.chrom,
-            pos=variant_data.pos,
-            ref=variant_data.ref,
-            alt=variant_data.alt,
-        )
-        variant_type_batch.append(variant_type)
-        hgvs_batch.append(hgvs)
+        variant_payload = f"{variant_data.chrom} {variant_data.pos} . {variant_data.ref} {variant_data.alt} . . ."
+        variant_payload_batch.append(variant_payload)
 
     # Payload to send to the API
-    # Payload format retrieved from https://grch37.rest.ensembl.org/documentation/info/vep_hgvs_post
-    payload = {"hgvs_notations": hgvs_batch}
+    # Payload format retrieved from https://grch37.rest.ensembl.org/documentation/info/vep_region_post
+    payload = {"variants": variant_payload_batch}
     vep_data_batch = make_vep_request(payload)
 
     # Iterate through all VEP data for this batch and create AnnotatedVariant instances
@@ -87,7 +78,6 @@ def build_annotation(variant_data_batch: list[Variant]) -> list[AnnotatedVariant
                 # Data from Variant
                 **variant_data_batch[idx].model_dump(),
                 gene=get_genes_for_most_severe_consequence(vep_data),
-                variant_type=variant_type_batch[idx],
                 consequence=vep_data["most_severe_consequence"],
                 alt_perc=round(
                     (variant_data_batch[idx].alt_reads * 100)

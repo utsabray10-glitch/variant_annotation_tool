@@ -73,7 +73,7 @@ def main():
             for variant in read_vcf(args.vcf):
                 batch.append(variant)
 
-                # When args.batch_size variants stored in batch, send batch for processing
+                # When args.batch_size number of variants stored in batch, send batch for processing
                 if len(batch) == args.batch_size:
                     # Submit batch to a single thread for processing
                     future = executor.submit(build_annotation, batch)

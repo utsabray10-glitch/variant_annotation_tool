@@ -85,13 +85,14 @@ A variant record from a VCF file
 - `ref_reads` _int_ - Number of reads supporting the reference allele
 - `alt_reads` _int_ - Number of reads supporting the alternate allele
 - `maf` _float_ - Minor allele frequency (0 to 1)
+- `type` _str_ - Type of variant ("snp", "ins", "del", "complex", "mnp")
 
 <a id="src.models.Variant.validate_alt_ref_equality"></a>
 
 #### validate\_alt\_ref\_equality
 
 ```python
-@model_validator(mode='after')
+@model_validator(mode="after")
 def validate_alt_ref_equality()
 ```
 
@@ -102,7 +103,7 @@ Validation function to ensure ALT allele is not equal to REF allele
 #### validate\_read\_depths
 
 ```python
-@model_validator(mode='after')
+@model_validator(mode="after")
 def validate_read_depths()
 ```
 
@@ -123,7 +124,6 @@ Contains all fields from Variant
 
   all fields from Variant
 - `alt_perc` _float_ - Percentage of reads supporting the alternate allele (0.0 to 100.0)
-- `variant_type` _str_ - Type of variant
 - `gene` _str_ - Gene affected by the variant
 - `consequence` _str_ - Consequence of the variant
 
@@ -232,13 +232,15 @@ Get gene for transcript matching most severe consequence
 #### make\_vep\_request
 
 ```python
-@retry(stop=stop_after_attempt(3),
-       wait=wait_random_exponential(multiplier=1, max=60),
-       retry=retry_if_exception_type(requests.exceptions.RequestException)
-       | retry_if_exception_type(requests.exceptions.HTTPError)
-       | retry_if_exception_type(requests.exceptions.ConnectionError)
-       | retry_if_exception_type(requests.exceptions.JSONDecodeError),
-       reraise=False)
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_random_exponential(multiplier=1, max=60),
+    retry=retry_if_exception_type(requests.exceptions.RequestException)
+    | retry_if_exception_type(requests.exceptions.HTTPError)
+    | retry_if_exception_type(requests.exceptions.ConnectionError)
+    | retry_if_exception_type(requests.exceptions.JSONDecodeError),
+    reraise=False,
+)
 def make_vep_request(payload: dict) -> dict
 ```
 
