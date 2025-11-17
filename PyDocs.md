@@ -32,7 +32,24 @@ python variant_annotation.py
 def main()
 ```
 
-Driver function to accept command line arguments, iterate through VCF variants in batches using multiple threads and write the results to a CSV
+Entrypoint to accept command line arguments
+
+<a id="variant_annotation.process"></a>
+
+#### process
+
+```python
+def process(output: Path, vcf: Path, threads: int, batch_size: int)
+```
+
+Driver function to iterate through VCF variants in batches using multiple threads and write the results to a CSV
+
+**Arguments**:
+
+- `output` _Path_ - Path to output CSV file with annotated variants
+- `vcf` _Path_ - Path to input VCF file
+- `threads` _int_ - Number of threads for parallel processing
+- `batch_size` _int_ - Number of variants to process in each batch
 
 <a id="variant_annotation.write_futures_in_order"></a>
 

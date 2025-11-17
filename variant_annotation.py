@@ -30,7 +30,7 @@ from src.models import AnnotatedVariant
 
 def main():
     """
-    Driver function to accept command line arguments, iterate through VCF variants in batches using multiple threads and write the results to a CSV
+    Entrypoint to accept command line arguments
     """
     parser = argparse.ArgumentParser(description="Annotate each variant in a VCF file")
     parser.add_argument(
@@ -58,24 +58,37 @@ def main():
 
     args = parser.parse_args()
 
-    with open(args.output, "w") as csvfile:
+    process(args.output, args.vcf, args.threads, args.batch_size)
+
+
+def process(output: Path, vcf: Path, threads: int, batch_size: int):
+    """
+    Driver function to iterate through VCF variants in batches using multiple threads and write the results to a CSV
+
+    Args:
+        output (Path): Path to output CSV file with annotated variants
+        vcf (Path): Path to input VCF file
+        threads (int): Number of threads for parallel processing
+        batch_size (int): Number of variants to process in each batch
+    """
+    with open(output, "w") as csvfile:
         # Get field names from the model so we can write the header before getting an instance of the model
         fieldnames = list(AnnotatedVariant.model_fields.keys())
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
         # Create thread pool once and reuse for all batches
-        with ThreadPoolExecutor(max_workers=args.threads) as executor:
+        with ThreadPoolExecutor(max_workers=threads) as executor:
             # Batch of variants with max length of list equal to args.batch_size
             batch = []
             # Each future represents an object to be called, where an individual thread is responsible for the called object and all of its computation
             futures = []
 
-            for variant in read_vcf(args.vcf):
+            for variant in read_vcf(vcf):
                 batch.append(variant)
 
                 # When args.batch_size number of variants stored in batch, send batch for processing
-                if len(batch) == args.batch_size:
+                if len(batch) == batch_size:
                     # Submit batch to a single thread for processing
                     future = executor.submit(build_annotation, batch)
                     # Order in which @future is inserted is order in which results are retrieved and written
@@ -85,7 +98,7 @@ def main():
                     batch = []
 
                     # When we have created args.threads number of threads, wait for all threads to finish, write results, and then resume processing
-                    if len(futures) == args.threads:
+                    if len(futures) == threads:
                         write_futures_in_order(futures, writer)
                         futures = []
 
