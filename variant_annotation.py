@@ -15,8 +15,8 @@ Args:
     --threads: Number of threads for parallel processing (default: 8, max: 32)
     --batch_size: Number of variants to process in each batch, relevant for querying Ensembl VEP API (default: 100)
 
-Output:
-    CSV file with annotated variants
+Note:
+    Writes CSV file with annotated variants
 """
 
 import argparse
@@ -87,7 +87,7 @@ def write_futures_in_order(futures:list[Future], writer: csv.DictWriter):
         futures (list[Future]): Single unit of work which is responsible for a batch of variants
         writer (csv.DictWriter): Enable writing of AnnotatedVariant model instances to a csv
     
-    Output:
+    Note:
         Write all annotated variants processed by all threads in @futues
     """
     for future in futures:
